@@ -14,7 +14,7 @@ def send_email_alert(subject, message):
     """
     # Define the sender and receiver email
     email = "ppuri9@myseneca.ca"
-    receiving_email = "parishapuri@gmail.com"
+    receiving_email = "parishapuri@gmail.com rjong1@myseneca.ca"
     # Makes the command to send an email with the subject and message
     command = f'echo "{message}" | mail -s "{subject}" {receiving_email}'
     # Runs the command using the os.system method
@@ -45,7 +45,7 @@ def monitor_log(log_file_path):
 
                 # Check the new log for suspicious activity
                 if check_for_sus(line):
-                    print("Suspicious activity detected.")  # Optional: print a message for debugging
+                    send_email_alert("Suspicious Activity Detected", line)
                     # Uncomment the next line if you want to send an email alert
                     # send_email_alert("Suspicious Activity Detected", f"Suspicious activity in log: {line}")
     except KeyboardInterrupt:
