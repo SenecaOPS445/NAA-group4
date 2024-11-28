@@ -3,16 +3,17 @@
 import sys
 from timemodule import Time  
 import time
-'''The function of this script is to get important messages from /var/log/auth.log and put them in a designated file.
-   This script should be imported together with a timemodule.py file specifically the Time script on OPS445 lab7f.py and must be ran in the same directory with the file.
+
+'''
+The function of this script is to get important messages from /var/log/auth.log and put them in a designated file.
+This script should be imported together with a timemodule.py file specifically the Time script on OPS445 lab7f.py and must be run in the same directory with the file.
 '''
 
-
 # Function to check if the log file exists and is readable
-def check_log_file(file_path: bool):
+def check_log_file(file_path: str) -> bool:
     try:
         with open(file_path, "r"):
-            pass
+            pass  # Just trying to open the file to check if it exists and is readable
     except FileNotFoundError:
         print("Error: The file", file_path, "does not exist.")
         return False
@@ -28,7 +29,7 @@ def check_log_file(file_path: bool):
 def read_log_file(file_path: str):
     try:
         with open(file_path, "r") as f:
-            return f.readlines()
+            return f.readlines()  # Read all lines in the file
     except Exception as e:
         print("An error occurred while reading", file_path, ":", str(e))
         return []
@@ -38,7 +39,7 @@ def filter_important_messages(lines, keywords):
     important_messages = []
     for line in lines:
         if contains_keywords(line, keywords):
-            important_messages.append(line.strip())
+            important_messages.append(line.strip())  # Add the line if it contains any of the keywords
     return important_messages
 
 # Function to check if a line contains any of the specified keywords
@@ -51,7 +52,7 @@ def contains_keywords(line, keywords):
 # Function to append important messages to the output file with timestamps
 def write_messages_to_file(messages, output_file):
     try:
-        with open(output_file, "a") as f:
+        with open(output_file, "a") as f:  # Open the file in append mode
             for message in messages:
                 timestamp = get_current_time()
                 f.write("[ " + timestamp + " ] Important message detected: " + message + "\n")
@@ -59,9 +60,8 @@ def write_messages_to_file(messages, output_file):
         print("Error writing to file", output_file, ":", str(e))
 
 # Function to monitor the log file for updates and write results to the output file
-def monitor_log(file_path, output_file, keywords):
-
-   file_path = '/var/log/auth.log' 
+def monitor_log(output_file, keywords):
+    file_path = '/var/log/auth.log'  # Hardcoded log file path
 
     if not check_log_file(file_path):
         return
@@ -95,14 +95,13 @@ def get_current_time():
     # We can modify the time or use any time-related operation
     return current_time.format_time()  # Returning formatted time as a string
 
-# Direct code block in if __name__ == "__main__"
+# Direct code block for execution
 if __name__ == "__main__":
 
-    if len(sys.argv) != 3:
-        print("Usage: sudo python3 auth_log_monitor.py <log_file_path> <output_file_path>")
+    if len(sys.argv) != 2:
+        print("Usage: sudo python3 auth_log_monitor.py <output_file_path>")
     else:
-        log_file = sys.argv[1]
-        output_file = sys.argv[2]
+        output_file = sys.argv[1]
 
         # Ensure the output file ends with '.txt'
         if not output_file.endswith('.txt'):
@@ -111,4 +110,4 @@ if __name__ == "__main__":
 
         keywords = ["Failed password", "authentication failure", "Invalid user", "error"]
 
-        monitor_log(log_file, output_file, keywords)
+        monitor_log(output_file, keywords)
