@@ -60,6 +60,9 @@ def write_messages_to_file(messages, output_file):
 
 # Function to monitor the log file for updates and write results to the output file
 def monitor_log(file_path, output_file, keywords):
+
+   file_path = '/var/log/auth.log' 
+
     if not check_log_file(file_path):
         return
 
