@@ -1,67 +1,111 @@
-#!/usr/bin/python3
-# Authors: Ronald Jong, Sambhav Sachdeva
-# Seneca ID: 033295148, 166945220
-# This script monitors the /var/log/auth.log file for suspicious activity and sends alerts.
+#!/usr/bin/env python3
 
-import os
 import sys
+from timemodule import Time  
 import time
+'''The function of this script is to get important messages from /var/log/auth.log and put them in a designated file.
+   This script should be imported together with a timemodule.py file specifically the Time script on OPS445 lab7f.py and must be ran in the same directory with the file.
+'''
 
-# Function to send an email alert
-def send_email_alert(subject, message):
-    """
-    Sends an email alert with the given subject and message.
-    """
-    # Define the sender and receiver email
-    email = "rjong1@myseneca.ca"
-    receving_email = "ronaldjong2323@gmail.com"
-    # Makes the command to send an email with the subject and message
-    command = f'echo "{message}" | mail -s "{subject}" {receving_email}'
-    # Runs the command using the os.system method
-    os.system(command)
 
-# Function to monitor log file and changes
-def monitor_log(log_file_path):
-    #open the log file read
-    with open(log_file_path, 'r') as file:
-        # Move to the end of the file to look for new entrys
-        file.seek(0, os.SEEK_END)
-        while True:
-            # Read the next line of the file
-            line = file.readline()
-            # if no new line is found, pause the script if no new line has been added.
-            if not line:
-                time.sleep(1)
-                continue
-            # Check the new log for suspiciouse activity
-            check_for_sus(line)
+# Function to check if the log file exists and is readable
+def check_log_file(file_path: bool):
+    try:
+        with open(file_path, "r"):
+            pass
+    except FileNotFoundError:
+        print("Error: The file", file_path, "does not exist.")
+        return False
+    except PermissionError:
+        print("Error: Permission denied for", file_path)
+        return False
+    except Exception as example_error:
+        print("An unexpected error occurred while accessing", file_path, ":", str(example_error))
+        return False
+    return True
 
-# Function to see if there is suspicios activity
-def check_for_sus(log_entry):
-    """
-    Check the log entry for suspicious activity.
-    """
-    # list of suspicious keywords which can indicate access to the server
-    suspicious_keywords = ["Failed password","authentication failure","Invalid user","Accepted password" ]
-    '''
-    using for loop to check for keyword in the log file which will return True if any suspicous keyword 
-    is detected or return False if no suspicios keyword is detected
-    '''
-    for keyword in suspicious_keywords:
-        if keyword in log_entry:
-            return True  
-    
+# Function to read the log file line by line
+def read_log_file(file_path: str):
+    try:
+        with open(file_path, "r") as f:
+            return f.readlines()
+    except Exception as e:
+        print("An error occurred while reading", file_path, ":", str(e))
+        return []
+
+# Function to extract important messages from a list of lines
+def filter_important_messages(lines, keywords):
+    important_messages = []
+    for line in lines:
+        if contains_keywords(line, keywords):
+            important_messages.append(line.strip())
+    return important_messages
+
+# Function to check if a line contains any of the specified keywords
+def contains_keywords(line, keywords):
+    for keyword in keywords:
+        if keyword in line:
+            return True
     return False
- 
-# Main function
-def main():
-    """
-    Main function to initiate monitoring of the auth.log file.
-    """
-    # Path to the auth.log file
-    auth_log_path = '/var/log/auth.log'
-    # Start monitoring the log file
-    monitor_log(auth_log_path)
+
+# Function to append important messages to the output file with timestamps
+def write_messages_to_file(messages, output_file):
+    try:
+        with open(output_file, "a") as f:
+            for message in messages:
+                timestamp = get_current_time()
+                f.write("[ " + timestamp + " ] Important message detected: " + message + "\n")
+    except Exception as e:
+        print("Error writing to file", output_file, ":", str(e))
+
+# Function to monitor the log file for updates and write results to the output file
+def monitor_log(file_path, output_file, keywords):
+    if not check_log_file(file_path):
+        return
+
+    print("Monitoring", file_path, "for important messages...")
+    print("Results will be saved to", output_file)
+
+    # Initialize previous content to detect updates
+    previous_lines = set()
+
+    while True:
+        # Read the current content of the file
+        current_lines = read_log_file(file_path)
+
+        # Identify new lines since the last check
+        new_lines = set(current_lines) - previous_lines
+
+        # Update the previous lines
+        previous_lines.update(new_lines)
+
+        # Filter and write important messages
+        important_messages = filter_important_messages(new_lines, keywords)
+        write_messages_to_file(important_messages, output_file)
+
+        # Wait for a defined interval before checking again
+        time.sleep(5)
+
+ get timestamp using the Time class
+def get_current_time():
+    current_time = Time(hour=12, minute=0, second=0)  # Example of creating a Time object with default values
+    # We can modify the time or use any time-related operation
+    return current_time.format_time()  # Returning formatted time as a string
+
 
 if __name__ == "__main__":
-    main()
+
+    if len(sys.argv) != 3:
+        print("Usage: sudo python3 auth_log_monitor.py <log_file_path> <output_file_path>")
+    else:
+        log_file = sys.argv[1]
+        output_file = sys.argv[2]
+
+        # Ensure the output file ends with '.txt'
+        if not output_file.endswith('.txt'):
+            print("Error: The output file must have a '.txt' extension.")
+            sys.exit(1)
+
+        keywords = ["Failed password", "authentication failure", "Invalid user", "error"]
+
+        monitor_log(log_file, output_file, keywords)
