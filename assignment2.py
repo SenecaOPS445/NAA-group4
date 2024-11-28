@@ -17,6 +17,8 @@ def send_email_alert(subject, message):
     receiving_email = "parishapuri@gmail.com rjong1@myseneca.ca"
     # Makes the command to send an email with the subject and message
     command = f'echo "{message}" | mail -s "{subject}" {receiving_email}'
+    # Prints the debug message
+    print(f"Sending email alert: {subject} - {message.strip()}")
     # Runs the command using the os.system method
     os.system(command)
 
