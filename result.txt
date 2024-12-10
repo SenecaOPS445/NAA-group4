@@ -1,0 +1,25 @@
+
+--------------------------------------------------
+group4
+--------------------------------------------------
+Python Version: 3.12.7 (main, Oct  1 2024, 11:15:50) [GCC 14.2.1 20240910]
+Ran on 2024-12-02 10:57:56.834054
+Git commit used: commit b3b34488768b3071e38e1a913c45ea2364b7460b
+Merge: c76b20e 0c66297
+Author: sambhavsachdeva <sambhavsachdeva567@icloud.com>
+Date:   Thu Nov 28 10:21:58 2024 -0500
+
+    Merge pull request #6 from SenecaOPS445/rlamoste-patch-1
+    
+    Final pull hopefully
+
+
+--------------------------------------------------
+Relevant, useful, shows ambition           1.0/  3
+Comments and Documentation                 2.0/  5
+Adequate commits with good messages        2.0/  5
+No redundant code, variable names          1.0/  2
+
+--------------------------------------------------
+Total: 6.0/15
+FEEDBACK:
